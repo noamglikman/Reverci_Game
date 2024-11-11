@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class Main {
-
-
     /**
      * The Main function to start the game.
      * Don't make any changes here
