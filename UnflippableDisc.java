@@ -1,6 +1,7 @@
-public class BombDisc implements Disc{
+public class UnflippableDisc implements Disc{
     private Player player;
-    public BombDisc(Player player){
+
+    public UnflippableDisc(Player player){
         this.player=player;
     }
     @Override
@@ -15,6 +16,6 @@ public class BombDisc implements Disc{
 
     @Override
     public String getType() {
-        return "💣";
+        return "⭕" ;
     }
 }

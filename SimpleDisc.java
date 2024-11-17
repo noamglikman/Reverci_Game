@@ -1,7 +1,8 @@
-public class BombDisc implements Disc{
+public class SimpleDisc implements Disc{
     private Player player;
-    public BombDisc(Player player){
-        this.player=player;
+
+    public SimpleDisc(Player player){
+        this.player= player;
     }
     @Override
     public Player getOwner() {
@@ -10,11 +11,11 @@ public class BombDisc implements Disc{
 
     @Override
     public void setOwner(Player player) {
-        this.player=player;
+    this.player=player;
     }
 
     @Override
     public String getType() {
-        return "💣";
+        return "⬤";
     }
 }
