@@ -12,7 +12,16 @@ public RandomAI(boolean isPlayerOne){
     List<Position> A= gameStatus.ValidMoves();
     Random random= new Random();
     Position randomPos= A.get(random.nextInt(A.size()));
-    Move moveAI= new Move(randomPos);
-        return moveAI;
+    Disc s1= new SimpleDisc(this);
+    Disc s2= new UnflippableDisc(this);
+    Disc s3= new BombDisc(this);
+    List<Disc> discType= new ArrayList<>();
+    discType.add(s1);
+    discType.add(s2);
+    discType.add(s3);
+    Random random1= new Random();
+    Disc randomDisc= discType.get(random1.nextInt(discType.size()));
+    Move moveAI= new Move(randomPos,randomDisc);
+            return moveAI;
     }
 }

@@ -7,7 +7,7 @@ public class GameLogic implements PlayableLogic {
     private Player player2;
     private Disc[][] board;
 
-    private Stack<Move> moveHistory;
+    private List<Move> moveHistory;
 
     private Player currentPlayer;
     private List<Position> toFlipFinal;
@@ -24,8 +24,10 @@ public class GameLogic implements PlayableLogic {
     public boolean locate_disc(Position a, Disc disc) {
         if(board[a.row()][a.col()]!=null) return false;
         if (isValidPos(a)>0){
-            Move move= new Move(a);
+            Move move= new Move(a,disc);
             move.makeMove(board,a,disc);
+            if (disc.getType().equals("💣")) currentPlayer.reduce_bomb();
+            if (disc.getType().equals("⭕")) currentPlayer.reduce_unflippedable();
             for(Position positions: toFlipFinal){
                 if (getDiscAtPosition(positions).getType().equals("⬤")){
                 board[positions.row()][positions.col()].setOwner(currentPlayer);}
@@ -33,26 +35,31 @@ public class GameLogic implements PlayableLogic {
                     bombType(positions);
                 }
             }
-            moveHistory.push(move);
+            moveHistory.add(move);
             switchPlayer();
             toFlipFinal.clear();
             return true;
         }
         return false;
     }
-    public void bombType(Position position){
+    public int bombType(Position position){
+        int counter=0;
+        getDiscAtPosition(position).setOwner(currentPlayer);
         for(int[] direction: DIRECTIONS){
             int row= position.row()+ direction[0];
             int col= position.col()+ direction[1];
             Position pos= new Position(row,col);
-            if (getDiscAtPosition(pos).getOwner() != currentPlayer&& getDiscAtPosition(pos)!=null){
-                if(getDiscAtPosition(pos).equals("⬤"))
-                board[row][col].setOwner(currentPlayer);
-                else if (getDiscAtPosition(pos).equals("💣")){
+            if (getDiscAtPosition(pos)!=null&&!getDiscAtPosition(pos).getOwner().equals(currentPlayer)){
+                if(getDiscAtPosition(pos).getType().equals("⬤")){
+                    counter++;
+                    board[row][col].setOwner(currentPlayer);}
+                else if (getDiscAtPosition(pos).getType().equals("💣")){
+                    counter++;
                     bombType(pos);
                 }
             }
         }
+        return 0;
     }
 
     @Override
@@ -88,7 +95,7 @@ public class GameLogic implements PlayableLogic {
             return 0;
         }
         for (int[] direction : DIRECTIONS) {
-            toFlip.clear();
+            List<Position> tempFlips = new ArrayList<>();
             int counter=0;
             int row = position.row()+ direction[0];
             int col = position.col()+ direction[1];
@@ -99,17 +106,16 @@ public class GameLogic implements PlayableLogic {
                     break;
                 }
                 if (board[row][col].getOwner() != currentPlayer) {
-                    Position discToFilp= new Position(row,col);
-                    toFlip.add(discToFilp);
+                    tempFlips.add(new Position(row,col));
                     foundOpponentDisc = true;
                     counter++;
                 }
                 // אם מצאנו דיסק של השחקן הנוכחי אחרי שמצאנו דיסקים של היריב
                 else if (foundOpponentDisc) {
-                    toFlipFinal= toFlip;
                     flips+=counter;
-                    return flips;
-                    // מצאנו מהלך חוקי
+                    toFlip.addAll(tempFlips);
+                    break;
+                    // מצאנו מהלך חוקי נצא מהלולאה ונבדוק את שאר הכיוונים
                 }
                 // אם פגשנו דיסק של השחקן הנוכחי מיידית, ללא דיסקים של היריב ביניהם
                 else {
@@ -120,7 +126,7 @@ public class GameLogic implements PlayableLogic {
                 col += direction[1];
             }
         }
-        // אם לא מצאנו שום כיוון שבו אפשר להפוך דיסקים
+        toFlipFinal=new ArrayList<>(toFlip);
         return flips;
     }
 
@@ -158,6 +164,8 @@ public class GameLogic implements PlayableLogic {
     @Override
     public boolean isGameFinished() {
         if (ValidMoves().isEmpty()){
+            if (isFirstPlayerTurn()) getSecondPlayer().addWin();
+            else getFirstPlayer().addWin();
             return true;
         }
         return false;
@@ -177,7 +185,15 @@ public class GameLogic implements PlayableLogic {
     @Override
     public void undoLastMove() {
         if (!moveHistory.isEmpty()){
-            moveHistory.pop();
+            moveHistory.removeLast();
+            board =new Disc[8][8];
+            board[4][4]= new SimpleDisc(getFirstPlayer());
+            board[3][3]= new SimpleDisc(getFirstPlayer());
+            board[3][4]= new SimpleDisc(getSecondPlayer());
+            board[4][3]= new SimpleDisc(getSecondPlayer());
+            for (Move move: moveHistory){
+                move.makeMove(this.board,move.position(),move.disc());
+            }
             switchPlayer();
         }
     }
