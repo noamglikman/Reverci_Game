@@ -20,4 +20,9 @@ public class Position {
     public int row() {
         return row;
     }
+    @Override
+    public boolean equals(Object object){
+        Position position=(Position)object;
+        return this.row() == position.row() && this.col() == position.col();
+    }
 }
