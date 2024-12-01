@@ -452,4 +452,7 @@ public class GameLogic implements PlayableLogic {
             System.out.println("\tNo previous move available to undo.");
         }
     }
+    public Player getCurrentPlayer(){
+        return currentPlayer;
+    }
 }
